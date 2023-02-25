@@ -36,3 +36,4 @@ def is_story_valid(story_obj: dict) -> bool:
     if any(not story_obj[key] for key in must_have_keys):
         return False
     return True
+
