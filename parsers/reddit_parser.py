@@ -2,7 +2,7 @@ import praw
 import re
 import csv
 from datetime import datetime
-from parsers.reddit_auth_tokens import REDDIT_TOKENS
+from TOKENS import REDDIT_TOKENS
 
 
 def remove_links(text):

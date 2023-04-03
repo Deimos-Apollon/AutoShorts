@@ -1,6 +1,6 @@
 import pymongo
 from pymongo.results import InsertOneResult
-from server_variables import HOST, PORT
+from TOKENS import HOST, PORT
 
 
 def save_video_to_db(video_obj: dict) -> InsertOneResult:
