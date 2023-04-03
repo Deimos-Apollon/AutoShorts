@@ -1,9 +1,9 @@
 from moviepy.audio.AudioClip import CompositeAudioClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 
-from VideoCreation.audio_clip import get_audio_clip
-from VideoCreation.subtitles_clip import get_subtitles_clip
-from VideoCreation.video_clip import get_video_clip
+from video_creation.audio_clip import get_audio_clip
+from video_creation.subtitles_clip import get_subtitles_clip
+from video_creation.video_clip import get_video_clip
 
 
 def create_content_video(video_path: str,
@@ -39,7 +39,7 @@ def create_content_video(video_path: str,
 
 
 if __name__ == "__main__":
-    create_content_video(video_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\input\1_Sunset.mpeg",
+    create_content_video(video_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\input\wheelchair.mp4",
                          voiced_audio_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\output\voiced.wav",
                          music_audio_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\input\Fluffing-a-Duck.mp3",
                          content_video_filename="output_after_refactor.mp4")

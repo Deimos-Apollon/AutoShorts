@@ -1,6 +1,7 @@
 from collections import namedtuple
 from typing import Sequence, List, Tuple
 import pvleopard
+from moviepy.video.VideoClip import TextClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 from TOKENS import PVLEOPARD_ACCESS_KEY
 
@@ -28,16 +29,11 @@ def __generate_subtitles(words: Sequence[Word]) -> List[Tuple[Tuple[float, float
         words_slice_info = ((start_time, end_time), " ".join([word_info.word for word_info in words_slice]))
         subtitles_list.append(words_slice_info)
 
-    # for word_item in words:
-    #     start_time = word_item.start_sec
-    #     end_time = word_item.end_sec
-    #     # there was a case when end = start with word 'I'
-    #     if end_time - start_time < 1e-10:
-    #         end_time += 0.2
-    #     word = word_item.word
-    #     word_info = ((start_time, end_time), word)
-    #     subtitles_list.append(word_info)
     return subtitles_list
+
+
+def text_transformer(txt):
+    return TextClip(txt, font='Impact', color='white', method="label")
 
 
 def get_subtitles_clip(audio_path: str) -> SubtitlesClip:
@@ -58,8 +54,9 @@ def get_subtitles_clip(audio_path: str) -> SubtitlesClip:
     subtitle_list = __generate_subtitles(words)
 
     # Create a SubtitlesClip object from the subtitle list and center it on the screen
-    subtitles = SubtitlesClip(subtitle_list)
+    subtitles = SubtitlesClip(subtitle_list, text_transformer)
     subtitles = subtitles.set_position(('center', 'center'))
+    subtitles = subtitles
 
     return subtitles
 
