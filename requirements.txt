@@ -1,0 +1,5 @@
+praw~=7.7.0
+pymongo~=4.3.3
+pyttsx3~=2.90
+moviepy~=1.0.3
+pvleopard~=1.2.1

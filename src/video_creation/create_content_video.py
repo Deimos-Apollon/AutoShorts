@@ -1,9 +1,10 @@
 from moviepy.audio.AudioClip import CompositeAudioClip
+from moviepy.audio.fx.volumex import volumex
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 
-from video_creation.audio_clip import get_audio_clip
-from video_creation.subtitles_clip import get_subtitles_clip
-from video_creation.video_clip import get_video_clip
+from src.video_creation.audio_clip import get_audio_clip
+from src.video_creation.subtitles_clip import get_subtitles_clip
+from src.video_creation.video_clip import get_video_clip
 
 
 def create_content_video(video_path: str,
@@ -22,16 +23,19 @@ def create_content_video(video_path: str,
     Returns:
         CompositeVideoClip: A CompositeVideoClip object representing the combined content video.
     """
-    subtitles_clip = get_subtitles_clip(voiced_audio_path)
     voiced_clip = get_audio_clip(voiced_audio_path)
-    music_clip = get_audio_clip(music_audio_path)
+    music_clip = get_audio_clip(music_audio_path).fx(volumex, 0.7) if music_audio_path else None
+
     video_clip = get_video_clip(video_path)
+    subtitles_clip = get_subtitles_clip(voiced_audio_path, size=(video_clip.h * 0.2, video_clip.w * 0.9))
 
     # Combine the audio clips
-    combined_audio = CompositeAudioClip([voiced_clip, music_clip])
+    combined_audio = CompositeAudioClip([voiced_clip, music_clip]) if music_clip else voiced_clip
 
     # Combine the video clip and the subtitles
     video_clip = CompositeVideoClip([video_clip, subtitles_clip.set_duration(video_clip.duration)])
+
+    video_clip = video_clip.set_duration(voiced_clip.duration + 1)
 
     # Set the combined audio clip to the video clip
     video_clip = video_clip.set_audio(combined_audio)
@@ -39,8 +43,12 @@ def create_content_video(video_path: str,
 
 
 if __name__ == "__main__":
-    create_content_video(video_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\input\wheelchair.mp4",
-                         voiced_audio_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\output\voiced.wav",
-                         music_audio_path=r"C:\Users\Deimos\Desktop\AutoShorts\playing\input\Fluffing-a-Duck.mp3",
-                         content_video_filename="output_after_refactor.mp4")
+    video_filename = "input.mp4"
+    voiced_story_filename = "voiced.wav"
+    music_filename = "audio.mp3"
+    out_video_filename = "first_video.mp4"
+    create_content_video(video_path=f"../../input/video/{video_filename}",
+                         voiced_audio_path=f"../../input/voiced/{voiced_story_filename}",
+                         music_audio_path=f"../../input/music/{music_filename}",
+                         content_video_filename=f"../../output/{out_video_filename}")
 

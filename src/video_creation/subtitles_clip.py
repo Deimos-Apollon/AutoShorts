@@ -22,27 +22,31 @@ def __generate_subtitles(words: Sequence[Word]) -> List[Tuple[Tuple[float, float
     """
     subtitles_list = []
     words_on_screen = 5
-    for i in range(0, len(words), words_on_screen):
-        words_slice = words[i:i+words_on_screen]
-        start_time = words_slice[0].end_sec
-        end_time = words_slice[-1].end_sec
-        words_slice_info = ((start_time, end_time), " ".join([word_info.word for word_info in words_slice]))
+
+    start_time, word_part = words[0].start_sec, []
+    for i, word_info in enumerate(words[:-1]):
+        if i % words_on_screen == 0:
+            word_part = []
+        start_time = word_info.start_sec
+        end_time = words[i+1].start_sec
+        word_part.append(word_info.word)
+        words_slice_info = ((start_time, end_time), " ".join(word_part))
         subtitles_list.append(words_slice_info)
 
+    # add last subtitles
+    word_part.append(words[-1].word)
+    words_slice_info = ((words[-1].start_sec, words[-1].end_sec), " ".join(word_part))
+    subtitles_list.append(words_slice_info)
     return subtitles_list
 
 
-def text_transformer(txt):
-    return TextClip(txt, font='Impact', color='white', method="label")
-
-
-def get_subtitles_clip(audio_path: str) -> SubtitlesClip:
+def get_subtitles_clip(audio_path: str, size: Tuple[int, int]) -> SubtitlesClip:
     """
     Generates a SubtitlesClip object given an audio file path.
 
     Args:
         audio_path (str): The path to the audio file to generate subtitles for.
-
+        size: Tuple[int, int]: Size of the subtitles on the video (height, width)
     Returns:
         SubtitlesClip: A SubtitlesClip object representing the subtitles of the audio file.
     """
@@ -52,6 +56,10 @@ def get_subtitles_clip(audio_path: str) -> SubtitlesClip:
 
     # Generate the subtitle list from the word sequence
     subtitle_list = __generate_subtitles(words)
+
+    def text_transformer(txt):
+        return TextClip(txt.upper(), font='Impact', color='gold', method='caption',
+                        stroke_color='black', size=size, fontsize=70, stroke_width=3)
 
     # Create a SubtitlesClip object from the subtitle list and center it on the screen
     subtitles = SubtitlesClip(subtitle_list, text_transformer)
