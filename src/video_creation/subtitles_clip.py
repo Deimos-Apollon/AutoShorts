@@ -21,17 +21,26 @@ def __generate_subtitles(words: Sequence[Word]) -> List[Tuple[Tuple[float, float
         tuple of start and end times and the subtitle text.
     """
     subtitles_list = []
-    words_on_screen = 5
+    words_on_screen = 4
 
     start_time, word_part = words[0].start_sec, []
     for i, word_info in enumerate(words[:-1]):
+
+        start_time = word_info.start_sec
+
+        is_end_of_sentence = (word_info.end_sec + 0.2) < words[i+1].start_sec
+        end_time = min(word_info.end_sec + 0.3, words[i+1].start_sec)
+
+        # фиксированное число слов на экраен
         if i % words_on_screen == 0:
             word_part = []
-        start_time = word_info.start_sec
-        end_time = words[i+1].start_sec
         word_part.append(word_info.word)
         words_slice_info = ((start_time, end_time), " ".join(word_part))
         subtitles_list.append(words_slice_info)
+
+        # если конец предложения - не использовать слово при показе следующего
+        if is_end_of_sentence:
+            word_part = []
 
     # add last subtitles
     word_part.append(words[-1].word)
@@ -58,13 +67,11 @@ def get_subtitles_clip(audio_path: str, size: Tuple[int, int]) -> SubtitlesClip:
     subtitle_list = __generate_subtitles(words)
 
     def text_transformer(txt):
-        return TextClip(txt.upper(), font='Impact', color='gold', method='caption',
+        return TextClip(txt.upper(), font='FreeSans-Bold', color='gold', method='caption',
                         stroke_color='black', size=size, fontsize=70, stroke_width=3)
 
     # Create a SubtitlesClip object from the subtitle list and center it on the screen
     subtitles = SubtitlesClip(subtitle_list, text_transformer)
     subtitles = subtitles.set_position(('center', 'center'))
-    subtitles = subtitles
 
     return subtitles
-
