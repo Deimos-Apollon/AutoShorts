@@ -1,5 +1,6 @@
 from moviepy.audio.AudioClip import CompositeAudioClip
 from moviepy.audio.fx.volumex import volumex
+from moviepy.video.VideoClip import ColorClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 
 from src.video_creation.audio_clip import get_audio_clip
@@ -27,24 +28,31 @@ def create_content_video(video_path: str,
     music_clip = get_audio_clip(music_audio_path).fx(volumex, 0.7) if music_audio_path else None
 
     video_clip = get_video_clip(video_path)
-    subtitles_clip = get_subtitles_clip(voiced_audio_path, size=(video_clip.h * 0.2, video_clip.w * 0.9))
+    image_width, image_height = video_clip.size
+    subtitles_clip = get_subtitles_clip(voiced_audio_path, size=(image_width, image_height*0.2)).set_duration(1)
 
     # Combine the audio clips
-    combined_audio = CompositeAudioClip([voiced_clip, music_clip]) if music_clip else voiced_clip
+    combined_audio = CompositeAudioClip([voiced_clip, music_clip.set_duration(video_clip.duration)]) if music_clip \
+        else voiced_clip
+
+    # Combine subtitles clip and transparent bg
+    color_clip = ColorClip(size=(int(image_width), int(image_height*0.1)),
+                           color=(0, 0, 0)).set_position(('center', 'center'))
+    color_clip = color_clip.set_opacity(.5).set_duration(video_clip.duration)
 
     # Combine the video clip and the subtitles
-    video_clip = CompositeVideoClip([video_clip, subtitles_clip.set_duration(video_clip.duration)])
-
-    video_clip = video_clip.set_duration(voiced_clip.duration + 1)
+    video_clip_with_bg = CompositeVideoClip([video_clip, color_clip])
+    video_clip = CompositeVideoClip([video_clip_with_bg, subtitles_clip.set_duration(video_clip.duration)])
 
     # Set the combined audio clip to the video clip
     video_clip = video_clip.set_audio(combined_audio)
+    video_clip = video_clip.set_duration(voiced_clip.duration + 1)
     video_clip.write_videofile(content_video_filename)
 
 
 if __name__ == "__main__":
     video_filename = "input.mp4"
-    voiced_story_filename = "voiced.wav"
+    voiced_story_filename = "voiced.mp3"
     music_filename = "audio.mp3"
     out_video_filename = "first_video.mp4"
     create_content_video(video_path=f"../../input/video/{video_filename}",
